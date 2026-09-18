@@ -29,4 +29,25 @@ export interface PublicEvent {
     event_date: string | null;
     location: string | null;
     upload_enabled: boolean;
+    photoCount: number;
+}
+
+export interface GalleryPhoto {
+    uuid: string;
+    url: string;
+    filename: string;
+    width: number | null;
+    height: number | null;
+    mime_type: string;
+}
+
+export interface GalleryPagination {
+    current_page: number;
+    last_page: number;
+}
+
+export interface GalleryPageProps {
+    event: { slug: string; name: string };
+    photos: GalleryPhoto[];
+    pagination: GalleryPagination;
 }

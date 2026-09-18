@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\Photo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
 use PHPUnit\Framework\Attributes\Test;
@@ -172,6 +173,23 @@ class PublicEventPageTest extends TestCase
                 ->missing('event.user_id')
                 ->missing('event.email')
                 ->missing('event.user')
+            );
+    }
+
+    // Property: Feature photo-gallery, Property 11 (Ready-photo-count correctness):
+    // event.photoCount equals the number of the event's ready photos.
+    #[Test]
+    public function event_page_exposes_ready_photo_count(): void
+    {
+        $event = Event::factory()->create(['status' => 'active', 'slug' => 'count-check']);
+
+        Photo::factory()->for($event)->count(3)->create(['status' => 'ready']);
+        Photo::factory()->for($event)->create(['status' => 'pending']);
+
+        $this->get('/e/count-check')
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Public/Event')
+                ->where('event.photoCount', 3)
             );
     }
 }

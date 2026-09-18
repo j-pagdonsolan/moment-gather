@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Photo;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,6 +40,7 @@ class PublicEventController extends Controller
             'event_date'     => $event->event_date?->toDateString(),
             'location'       => $event->location,
             'upload_enabled' => $event->upload_enabled,
+            'photoCount'     => $event->photos()->where('status', Photo::STATUS_READY)->count(),
         ];
 
         return Inertia::render('Public/Event', [

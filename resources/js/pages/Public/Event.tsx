@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 import PhotoUploader from '@/components/PhotoUploader';
 import { Button } from '@/components/ui/button';
@@ -62,8 +62,10 @@ export default function PublicEventPage({ event }: Props) {
                         </p>
                     )}
 
-                    <Button size="lg" variant="outline" className="w-full">
-                        View Gallery
+                    <Button asChild size="lg" variant="outline" className="w-full">
+                        <Link href={`/e/${event.slug}/gallery`}>
+                            View Gallery{event.photoCount > 0 ? ` — ${event.photoCount} photos` : ''}
+                        </Link>
                     </Button>
                 </div>
             </div>
