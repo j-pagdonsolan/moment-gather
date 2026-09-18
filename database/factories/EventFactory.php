@@ -46,4 +46,28 @@ class EventFactory extends Factory
             'upload_enabled' => $this->faker->boolean(),
         ];
     }
+
+    /**
+     * Indicate that the event is active.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => ['status' => 'active']);
+    }
+
+    /**
+     * Indicate that the event is a draft.
+     */
+    public function draft(): static
+    {
+        return $this->state(fn (array $attributes) => ['status' => 'draft']);
+    }
+
+    /**
+     * Indicate that the event is archived.
+     */
+    public function archived(): static
+    {
+        return $this->state(fn (array $attributes) => ['status' => 'archived']);
+    }
 }

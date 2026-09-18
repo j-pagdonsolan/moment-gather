@@ -40,4 +40,76 @@ class PhotoFactory extends Factory
             'status'            => Photo::STATUS_READY,
         ];
     }
+
+    /**
+     * Pending state: awaiting processing, no processed variants yet.
+     */
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status'         => Photo::STATUS_PENDING,
+            'optimized_path' => null,
+            'thumbnail_path' => null,
+        ]);
+    }
+
+    /**
+     * Processing state: variants are being generated.
+     */
+    public function processing(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => Photo::STATUS_PROCESSING,
+        ]);
+    }
+
+    /**
+     * Failed state: processing failed.
+     */
+    public function failed(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => Photo::STATUS_FAILED,
+        ]);
+    }
+
+    /**
+     * Ready state: processing complete with optimized + thumbnail variants.
+     *
+     * The event uuid is not available inside the state closure, so the
+     * processed paths are derived once the related event is resolvable via
+     * afterMaking/afterCreating, mirroring PhotoProcessor output exactly:
+     *   events/{eventUuid}/optimized/{photoUuid}.webp
+     *   events/{eventUuid}/thumbnails/{photoUuid}.webp
+     */
+    public function ready(): static
+    {
+        return $this
+            ->state(fn (array $attributes): array => [
+                'status' => Photo::STATUS_READY,
+            ])
+            ->afterMaking(function (Photo $photo): void {
+                $this->applyProcessedPaths($photo);
+            })
+            ->afterCreating(function (Photo $photo): void {
+                $this->applyProcessedPaths($photo);
+                $photo->save();
+            });
+    }
+
+    /**
+     * Derive and set the processed variant paths from the related event uuid
+     * and the photo uuid, mirroring PhotoProcessor output exactly.
+     */
+    private function applyProcessedPaths(Photo $photo): void
+    {
+        $event = $photo->event ?? $photo->loadMissing('event')->event ?? $photo->event()->first();
+
+        $eventUuid = $event?->uuid ?? (string) Str::uuid();
+        $photoUuid = $photo->uuid ?: (string) Str::uuid();
+
+        $photo->uuid           = $photoUuid;
+        $photo->optimized_path = "events/{$eventUuid}/optimized/{$photoUuid}.webp";
+        $photo->thumbnail_path = "events/{$eventUuid}/thumbnails/{$photoUuid}.webp";
+    }
 }
