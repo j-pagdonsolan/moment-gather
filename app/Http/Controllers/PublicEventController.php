@@ -27,10 +27,13 @@ class PublicEventController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
-        // Narrow, attendee-only payload. Organizer-private fields
-        // (id, uuid, user_id, slug, timestamps, user relationship) are
-        // intentionally excluded and never sent to the frontend.
+        // Narrow, attendee-only payload. The slug is safe to expose
+        // (it is already part of the public URL) and is needed by the
+        // uploader. Organizer-private fields (id, uuid, user_id,
+        // timestamps, user relationship) are intentionally excluded and
+        // never sent to the frontend.
         $payload = [
+            'slug'           => $event->slug,
             'name'           => $event->name,
             'description'    => $event->description,
             'event_date'     => $event->event_date?->toDateString(),

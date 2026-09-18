@@ -68,7 +68,10 @@ class EventController extends Controller
     {
         $this->authorize('view', $event);
 
-        return Inertia::render('Events/Show', ['event' => $event]);
+        return Inertia::render('Events/Show', [
+            'event'     => $event,
+            'publicUrl' => route('public.events.show', ['slug' => $event->slug]),
+        ]);
     }
 
     /**

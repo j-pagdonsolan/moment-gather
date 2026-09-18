@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import QrCode from '@/components/QrCode';
 import { dashboard } from '@/routes';
 import {
     destroy as eventsDestroy,
@@ -23,15 +24,16 @@ import type { Event } from '@/types';
 
 interface Props {
     event: Event;
+    publicUrl: string;
 }
 
 function formatDate(value: string | null): string {
     return value ? new Date(value).toLocaleDateString() : 'No date set';
 }
 
-const comingSoonSections = ['QR Code', 'Photo Gallery', 'Uploads'] as const;
+const comingSoonSections = ['Photo Gallery', 'Uploads'] as const;
 
-export default function EventsShow({ event }: Props) {
+export default function EventsShow({ event, publicUrl }: Props) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
 
     const confirmDelete = () => {
@@ -90,6 +92,19 @@ export default function EventsShow({ event }: Props) {
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Event QR Code</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        <p className="text-muted-foreground text-sm">
+                            Guests can scan this QR code to open your event page.
+                        </p>
+                        <QrCode url={publicUrl} fileName={`momentgather-${event.slug}-qr.png`} />
+                        <p className="text-muted-foreground break-all text-xs">{publicUrl}</p>
+                    </CardContent>
+                </Card>
+
                 <div className="grid gap-4 md:grid-cols-3">
                     {comingSoonSections.map((section) => (
                         <Card key={section}>
@@ -126,7 +141,7 @@ export default function EventsShow({ event }: Props) {
     );
 }
 
-EventsShow.layout = (props: { event: Event }) => ({
+EventsShow.layout = (props: { event: Event; publicUrl: string }) => ({
     breadcrumbs: [
         {
             title: 'Dashboard',

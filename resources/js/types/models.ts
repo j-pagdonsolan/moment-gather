@@ -23,6 +23,7 @@ export interface DashboardStats {
 }
 
 export interface PublicEvent {
+    slug: string;
     name: string;
     description: string | null;
     event_date: string | null;

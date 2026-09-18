@@ -170,7 +170,6 @@ class PublicEventPageTest extends TestCase
                 ->missing('event.id')
                 ->missing('event.uuid')
                 ->missing('event.user_id')
-                ->missing('event.slug')
                 ->missing('event.email')
                 ->missing('event.user')
             );

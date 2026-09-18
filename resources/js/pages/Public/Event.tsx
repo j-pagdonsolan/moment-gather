@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 
+import PhotoUploader from '@/components/PhotoUploader';
 import { Button } from '@/components/ui/button';
 import type { PublicEvent } from '@/types';
 
@@ -54,9 +55,7 @@ export default function PublicEventPage({ event }: Props) {
 
                 <div className="mt-2 flex flex-col gap-3">
                     {event.upload_enabled ? (
-                        <Button size="lg" className="w-full">
-                            Upload Photos
-                        </Button>
+                        <PhotoUploader slug={event.slug} />
                     ) : (
                         <p className="text-center text-sm text-muted-foreground">
                             Photo uploads are currently closed.

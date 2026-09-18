@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\PublicEventController;
+use App\Http\Controllers\PublicPhotoUploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -10,6 +11,11 @@ Route::inertia('/', 'welcome')->name('home');
 // Public attendee-facing event page. No authentication.
 Route::get('/e/{slug}', [PublicEventController::class, 'show'])
     ->name('public.events.show');
+
+// Public guest photo upload. No authentication. Rate-limited by IP.
+Route::post('/e/{slug}/photos', [PublicPhotoUploadController::class, 'store'])
+    ->middleware('throttle:uploads')
+    ->name('public.events.photos.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
