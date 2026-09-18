@@ -4,6 +4,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { dashboard } from '@/routes';
 import {
     edit as eventsEdit,
@@ -37,7 +38,9 @@ export default function EventsEdit({ event }: EventsEditProps) {
 
             <form onSubmit={submit} className="space-y-6">
                 <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">
+                        Name <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                         id="name"
                         name="name"
@@ -52,7 +55,7 @@ export default function EventsEdit({ event }: EventsEditProps) {
 
                 <div className="grid gap-2">
                     <Label htmlFor="description">Description</Label>
-                    <textarea
+                    <Textarea
                         id="description"
                         name="description"
                         value={data.description}
@@ -60,8 +63,8 @@ export default function EventsEdit({ event }: EventsEditProps) {
                             setData('description', e.target.value)
                         }
                         maxLength={5000}
-                        rows={4}
-                        className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        rows={5}
+                        placeholder="Describe your event"
                     />
                     <InputError message={errors.description} />
                 </div>
@@ -113,7 +116,7 @@ export default function EventsEdit({ event }: EventsEditProps) {
 
                 <div className="flex items-center gap-4">
                     <Button type="submit" disabled={processing}>
-                        Save
+                        {processing ? 'Saving…' : 'Save'}
                     </Button>
                 </div>
             </form>

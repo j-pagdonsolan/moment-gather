@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import {
     InputOTP,
     InputOTPGroup,
@@ -109,6 +110,7 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
+                                {processing && <Spinner />}
                                 Continue
                             </Button>
 

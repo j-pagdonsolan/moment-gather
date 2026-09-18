@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ExternalLink, Images } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,6 @@ interface Props {
 function formatDate(value: string | null): string {
     return value ? new Date(value).toLocaleDateString() : 'No date set';
 }
-
-const comingSoonSections = ['Photo Gallery', 'Uploads'] as const;
 
 export default function EventsShow({ event, publicUrl }: Props) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -94,29 +93,36 @@ export default function EventsShow({ event, publicUrl }: Props) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Event QR Code</CardTitle>
+                        <CardTitle>Event QR Code &mdash; {event.name}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
                         <p className="text-muted-foreground text-sm">
-                            Guests can scan this QR code to open your event page.
+                            Guests scan this to open {event.name}.
                         </p>
                         <QrCode url={publicUrl} fileName={`momentgather-${event.slug}-qr.png`} />
                         <p className="text-muted-foreground break-all text-xs">{publicUrl}</p>
                     </CardContent>
                 </Card>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                    {comingSoonSections.map((section) => (
-                        <Card key={section}>
-                            <CardHeader>
-                                <CardTitle>{section}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Badge variant="secondary">Coming Soon</Badge>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Share &amp; View</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-3 sm:flex-row">
+                        <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+                            <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="size-4" />
+                                Open Public Page
+                            </a>
+                        </Button>
+                        <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+                            <a href={`/e/${event.slug}/gallery`} target="_blank" rel="noopener noreferrer">
+                                <Images className="size-4" />
+                                View Gallery
+                            </a>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
 
             <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>

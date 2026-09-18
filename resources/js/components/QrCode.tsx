@@ -57,15 +57,15 @@ export default function QrCode({ url, fileName, className }: QrCodeProps) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-                <Button onClick={handleDownload}>
+                <Button className="min-h-11" onClick={handleDownload}>
                     <Download className="mr-2 size-4" />
                     Download QR Code
                 </Button>
-                <Button variant="outline" onClick={handleCopy}>
+                <Button className="min-h-11" variant="outline" onClick={handleCopy}>
                     <Copy className="mr-2 size-4" />
                     Copy Link
                 </Button>
-                <Button asChild variant="outline">
+                <Button asChild className="min-h-11" variant="outline">
                     <a href={url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-2 size-4" />
                         Open Event

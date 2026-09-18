@@ -57,6 +57,8 @@ class EventController extends Controller
                 'upload_enabled' => true,
             ]);
 
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Event created.']);
+
             return to_route('events.show', $event);
         });
     }
@@ -93,6 +95,8 @@ class EventController extends Controller
 
         $event->update($request->validated());
 
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Event updated.']);
+
         return to_route('events.show', $event);
     }
 
@@ -104,6 +108,8 @@ class EventController extends Controller
         $this->authorize('delete', $event);
 
         $event->delete();
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Event deleted.']);
 
         return to_route('events.index');
     }

@@ -1,8 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ImageOff } from 'lucide-react';
 import { useState } from 'react';
+import EmptyState from '@/components/empty-state';
 import PhotoGrid from '@/components/PhotoGrid';
 import PhotoViewer from '@/components/PhotoViewer';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { GalleryPageProps, GalleryPhoto } from '@/types';
 
 export default function GalleryPage({ event, photos, pagination }: GalleryPageProps) {
@@ -49,18 +52,32 @@ export default function GalleryPage({ event, photos, pagination }: GalleryPagePr
                 </header>
 
                 {items.length === 0 ? (
-                    <div className="flex flex-col items-center gap-3 py-20 text-center">
-                        <p className="text-lg font-medium text-foreground">No photos yet</p>
-                        <p className="text-muted-foreground">
-                            Be the first to share a moment from this event.
-                        </p>
-                        <Button asChild size="lg">
-                            <Link href={`/e/${event.slug}`}>Upload Photos</Link>
-                        </Button>
-                    </div>
+                    <EmptyState
+                        icon={ImageOff}
+                        title="No photos yet"
+                        description="Be the first to share a moment from this event."
+                        action={
+                            <Button asChild size="lg">
+                                <Link href={`/e/${event.slug}`}>Upload Photos</Link>
+                            </Button>
+                        }
+                    />
                 ) : (
                     <>
                         <PhotoGrid photos={items} onSelect={(i) => setViewerIndex(i)} />
+
+                        {loading && (
+                            <div
+                                className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+                                aria-live="polite"
+                                aria-busy="true"
+                            >
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <Skeleton key={i} className="aspect-square w-full rounded-lg" />
+                                ))}
+                            </div>
+                        )}
+
                         {hasMore && (
                             <div className="mt-8 flex justify-center">
                                 <Button variant="outline" size="lg" onClick={loadMore} disabled={loading}>

@@ -1,7 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { CalendarPlus } from 'lucide-react';
 import { useState } from 'react';
+import EmptyState from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Dialog,
     DialogClose,
@@ -54,64 +63,99 @@ export default function EventsIndex({ events }: Props) {
                 </div>
 
                 {events.length === 0 ? (
-                    <p className="text-muted-foreground">
-                        You have no events yet.{' '}
-                        <Link href={eventsCreate()} className="underline">
-                            Create your first event.
-                        </Link>
-                    </p>
+                    <EmptyState
+                        icon={CalendarPlus}
+                        title="No events yet"
+                        description="Create your first event to start collecting photos."
+                        action={
+                            <Button asChild>
+                                <Link href={eventsCreate()}>Create Event</Link>
+                            </Button>
+                        }
+                    />
                 ) : (
-                    <div className="overflow-x-auto rounded-md border">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b text-left">
-                                    <th className="px-4 py-3 font-medium">Name</th>
-                                    <th className="px-4 py-3 font-medium">Event Date</th>
-                                    <th className="px-4 py-3 font-medium">Location</th>
-                                    <th className="px-4 py-3 font-medium">Status</th>
-                                    <th className="px-4 py-3 font-medium">Uploads</th>
-                                    <th className="px-4 py-3 font-medium">Created</th>
-                                    <th className="px-4 py-3 text-right font-medium">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {events.map((event) => (
-                                    <tr key={event.uuid} className="border-b last:border-0">
-                                        <td className="px-4 py-3 font-medium">{event.name}</td>
-                                        <td className="px-4 py-3 text-muted-foreground">{formatDate(event.event_date)}</td>
-                                        <td className="px-4 py-3 text-muted-foreground">{event.location ?? 'No location'}</td>
-                                        <td className="px-4 py-3">
-                                            <Badge variant={event.status === 'active' ? 'default' : 'secondary'}>
-                                                {event.status}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-4 py-3 text-muted-foreground">
-                                            {event.upload_enabled ? 'Uploads on' : 'Uploads off'}
-                                        </td>
-                                        <td className="px-4 py-3 text-muted-foreground">
-                                            {new Date(event.created_at).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={eventsShow({ event: event.uuid })}>View</Link>
-                                                </Button>
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={eventsEdit({ event: event.uuid })}>Edit</Link>
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => setPendingDelete(event)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {events.map((event) => (
+                            <Card key={event.uuid} className="flex flex-col">
+                                <CardHeader>
+                                    <div className="flex items-start justify-between gap-3">
+                                        <CardTitle className="text-lg">
+                                            <Link
+                                                href={eventsShow({ event: event.uuid })}
+                                                className="hover:underline"
+                                            >
+                                                {event.name}
+                                            </Link>
+                                        </CardTitle>
+                                        <Badge
+                                            variant={
+                                                event.status === 'active'
+                                                    ? 'default'
+                                                    : 'secondary'
+                                            }
+                                        >
+                                            {event.status}
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex flex-1 flex-col gap-3 text-sm">
+                                    <div>
+                                        <p className="text-muted-foreground">Event Date</p>
+                                        <p>{formatDate(event.event_date)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-muted-foreground">Location</p>
+                                        <p>{event.location ?? 'No location'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-muted-foreground">Uploads</p>
+                                        <p>
+                                            {event.upload_enabled
+                                                ? 'Uploads on'
+                                                : 'Uploads off'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-muted-foreground">Created</p>
+                                        <p>
+                                            {new Date(
+                                                event.created_at,
+                                            ).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="flex flex-wrap gap-2">
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        size="sm"
+                                        className="min-h-11 flex-1"
+                                    >
+                                        <Link href={eventsShow({ event: event.uuid })}>
+                                            View
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        size="sm"
+                                        className="min-h-11 flex-1"
+                                    >
+                                        <Link href={eventsEdit({ event: event.uuid })}>
+                                            Edit
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="min-h-11 flex-1"
+                                        onClick={() => setPendingDelete(event)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
                     </div>
                 )}
             </div>

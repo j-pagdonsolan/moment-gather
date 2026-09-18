@@ -5,7 +5,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 import { dashboard } from '@/routes';
 import {
     create as eventsCreate,
@@ -46,7 +46,9 @@ export default function EventsCreate() {
 
                 <form onSubmit={submit} className="max-w-2xl space-y-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">
+                            Name <span className="text-destructive">*</span>
+                        </Label>
 
                         <Input
                             id="name"
@@ -65,7 +67,7 @@ export default function EventsCreate() {
                     <div className="grid gap-2">
                         <Label htmlFor="description">Description</Label>
 
-                        <textarea
+                        <Textarea
                             id="description"
                             name="description"
                             value={data.description}
@@ -75,9 +77,6 @@ export default function EventsCreate() {
                             maxLength={5000}
                             rows={5}
                             placeholder="Describe your event"
-                            className={cn(
-                                'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-                            )}
                         />
 
                         <InputError message={errors.description} />
@@ -123,7 +122,7 @@ export default function EventsCreate() {
                             disabled={processing}
                             data-test="create-event-button"
                         >
-                            Create Event
+                            {processing ? 'Creating…' : 'Create Event'}
                         </Button>
                     </div>
                 </form>
