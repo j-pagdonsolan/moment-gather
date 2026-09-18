@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // The payment-provider webhook cannot present a CSRF token; authenticity
+        // is enforced by verifying the provider signature inside WebhookController.
+        $middleware->validateCsrfTokens(except: ['billing/webhook']);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,

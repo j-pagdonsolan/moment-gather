@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\BillingService;
 use App\Http\Requests\StorePhotosRequest;
 use App\Jobs\ProcessPhoto;
 use App\Models\Event;
@@ -22,7 +23,7 @@ class PublicPhotoUploadController extends Controller
      * synchronously; optimization and thumbnailing are dispatched to a
      * background job (one per photo) via the queue.
      */
-    public function store(StorePhotosRequest $request, string $slug): RedirectResponse
+    public function store(StorePhotosRequest $request, string $slug, BillingService $billing): RedirectResponse
     {
         $event = Event::query()
             ->where('slug', $slug)
@@ -46,6 +47,26 @@ class PublicPhotoUploadController extends Controller
             ]);
 
             abort(403, 'This event has reached its photo limit. Please contact the organizer.');
+        }
+
+        // Plan limit gate (billing). Scoped to the event OWNER's plan: rejects the
+        // whole batch atomically when the event's plan photo-limit or the owner's
+        // storage-limit would be exceeded. This is a separate gate that coexists with
+        // the abuse cap above; it stores nothing and dispatches nothing on failure
+        // because the abort happens before the storage loop. Not bypassable by
+        // splitting a batch (the full incoming count/bytes are evaluated together).
+        $owner         = $event->user; // Event belongsTo user.
+        $files         = $request->file('photos');
+        $incomingCount = count($files);
+        $incomingBytes = array_sum(array_map(fn ($f) => (int) $f->getSize(), $files));
+
+        if (! $billing->canUploadPhotos($owner, $event, $incomingCount, $incomingBytes)) {
+            Log::warning('Upload rejected: plan limit exceeded', [
+                'event_slug' => $event->slug,
+                'incoming'   => $incomingCount,
+            ]);
+
+            abort(403, 'This event has reached its plan limit. Ask the organizer to upgrade for more photos or storage.');
         }
 
         $disk = Storage::disk('public');

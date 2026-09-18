@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\BillingService;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
@@ -15,7 +16,10 @@ use Inertia\Response;
 
 class EventController extends Controller
 {
-    public function __construct(private SlugGenerator $slugGenerator) {}
+    public function __construct(
+        private SlugGenerator $slugGenerator,
+        private BillingService $billing,
+    ) {}
 
     /**
      * Display a listing of the authenticated user's events.
@@ -43,6 +47,15 @@ class EventController extends Controller
     public function store(StoreEventRequest $request): RedirectResponse
     {
         return DB::transaction(function () use ($request): RedirectResponse {
+            if (! $this->billing->canCreateEvent($request->user())) {
+                Inertia::flash('toast', [
+                    'type'    => 'error',
+                    'message' => "You've reached the maximum number of active events for your plan. Upgrade to Pro on the Billing page or archive an event to create more.",
+                ]);
+
+                return back();
+            }
+
             $data = $request->validated();
 
             $uuid = (string) Str::uuid();
