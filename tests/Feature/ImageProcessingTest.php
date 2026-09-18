@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Photo;
-use App\Services\PhotoProcessor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -75,6 +74,9 @@ class ImageProcessingTest extends TestCase
         $this->assertSame(1, Photo::count());
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
+
         $this->assertSame(Photo::STATUS_READY, $photo->status);
         $this->assertNotNull($photo->optimized_path);
         $this->assertNotNull($photo->thumbnail_path);
@@ -102,6 +104,8 @@ class ImageProcessingTest extends TestCase
             ->assertRedirect("/e/{$event->slug}");
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
 
         [$ow, $oh, $omime] = $this->storedDimensions($photo->optimized_path);
         $this->assertLessThanOrEqual(2048, max($ow, $oh));
@@ -128,6 +132,8 @@ class ImageProcessingTest extends TestCase
             ->assertRedirect("/e/{$event->slug}");
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
 
         [$ow, $oh] = $this->storedDimensions($photo->optimized_path);
         $this->assertSame(300, $ow);
@@ -151,6 +157,8 @@ class ImageProcessingTest extends TestCase
             ->assertRedirect("/e/{$event->slug}");
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
 
         [$ow, $oh] = $this->storedDimensions($photo->optimized_path);
         $this->assertGreaterThan($ow, $oh);
@@ -174,6 +182,8 @@ class ImageProcessingTest extends TestCase
 
             $photo = $event->photos()->first();
             $this->assertNotNull($photo, "Expected {$format} upload to persist a photo.");
+            \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+            $photo->refresh();
             $this->assertSame(Photo::STATUS_READY, $photo->status, "Expected {$format} to be ready.");
 
             $disk = Storage::disk('public');
@@ -204,6 +214,9 @@ class ImageProcessingTest extends TestCase
             ->assertRedirect("/e/{$event->slug}");
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
+
         $this->assertSame($expected, md5(Storage::disk('public')->get($photo->original_path)));
     }
 
@@ -260,6 +273,9 @@ class ImageProcessingTest extends TestCase
         $this->upload($event, [$file])->assertRedirect("/e/{$event->slug}");
 
         $photo = Photo::first();
+        \App\Jobs\ProcessPhoto::dispatchSync($photo->id);
+        $photo->refresh();
+
         $this->assertSame("events/{$event->uuid}/optimized/{$photo->uuid}.webp", $photo->optimized_path);
         $this->assertSame("events/{$event->uuid}/thumbnails/{$photo->uuid}.webp", $photo->thumbnail_path);
     }
@@ -272,15 +288,10 @@ class ImageProcessingTest extends TestCase
     #[Test]
     public function processing_failure_marks_failed_and_cleans_up(): void
     {
-        $this->instance(PhotoProcessor::class, new class extends PhotoProcessor
-        {
-            public function process(string $originalPath, string $eventUuid, string $photoUuid): array
-            {
-                throw new \RuntimeException('boom');
-            }
-        });
-
         Storage::fake('public');
+        // Queue is deferred: the upload only enqueues the job, so the request
+        // succeeds regardless of downstream processing outcome.
+        \Illuminate\Support\Facades\Queue::fake();
         $event = $this->activeUploadableEvent();
 
         $response = $this->upload($event, [$this->makeImage(600, 400, 'jpeg')]);
@@ -290,9 +301,20 @@ class ImageProcessingTest extends TestCase
         $response->assertSessionHasNoErrors();
 
         $photo = Photo::first();
+
+        // Simulate the job lifecycle: retries are exhausted and the failed()
+        // handler runs. Pre-place partial processed files so the cleanup
+        // assertion below is meaningful.
+        $disk = Storage::disk('public');
+        $disk->put("events/{$event->uuid}/optimized/{$photo->uuid}.webp", 'partial');
+        $disk->put("events/{$event->uuid}/thumbnails/{$photo->uuid}.webp", 'partial');
+
+        $job = new \App\Jobs\ProcessPhoto($photo->id);
+        $job->failed(new \RuntimeException('boom'));
+        $photo->refresh();
+
         $this->assertSame(Photo::STATUS_FAILED, $photo->status);
 
-        $disk = Storage::disk('public');
         $disk->assertMissing("events/{$event->uuid}/optimized/{$photo->uuid}.webp");
         $disk->assertMissing("events/{$event->uuid}/thumbnails/{$photo->uuid}.webp");
         // Original is retained.

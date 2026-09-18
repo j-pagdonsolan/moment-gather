@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ProcessPhoto;
 use App\Models\Event;
 use App\Models\Photo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -75,6 +77,7 @@ class GuestPhotoUploadTest extends TestCase
 
         foreach ($cases as [$name, $mime]) {
             Storage::fake('public');
+            Queue::fake();
             $event = $this->uploadableEvent();
 
             $this->upload($event, [$this->fixtureFile($name, $mime)])
@@ -163,6 +166,7 @@ class GuestPhotoUploadTest extends TestCase
     public function upload_to_active_enabled_event_succeeds_and_persists_metadata(): void
     {
         Storage::fake('public');
+        Queue::fake();
         $event = $this->uploadableEvent();
 
         $file = new UploadedFile(
@@ -183,8 +187,8 @@ class GuestPhotoUploadTest extends TestCase
         // Property 6: event association is the slug-resolved event.
         $this->assertSame($event->id, $photo->event_id);
 
-        // Property 8: status forced to ready.
-        $this->assertSame(Photo::STATUS_READY, $photo->status);
+        // Property 8: status is pending until the queued job processes it.
+        $this->assertSame(Photo::STATUS_PENDING, $photo->status);
 
         // Property 11: client's original filename preserved.
         $this->assertSame('my vacation.jpg', $photo->original_filename);
@@ -207,6 +211,9 @@ class GuestPhotoUploadTest extends TestCase
         $this->assertSame(1, $photo->height);
 
         Storage::disk('public')->assertExists($photo->original_path);
+
+        // A ProcessPhoto job is dispatched to handle async processing.
+        Queue::assertPushed(ProcessPhoto::class);
     }
 
     // Feature: guest-photo-upload, Property 3: uploading to a draft event
@@ -269,6 +276,7 @@ class GuestPhotoUploadTest extends TestCase
     public function client_cannot_override_event_id_status_or_path(): void
     {
         Storage::fake('public');
+        Queue::fake();
         $target = $this->uploadableEvent();
         $other  = $this->uploadableEvent();
 
@@ -284,7 +292,7 @@ class GuestPhotoUploadTest extends TestCase
 
         $photo = Photo::firstOrFail();
         $this->assertSame($target->id, $photo->event_id);
-        $this->assertSame(Photo::STATUS_READY, $photo->status);
+        $this->assertSame(Photo::STATUS_PENDING, $photo->status);
         $this->assertStringStartsWith(
             "events/{$target->uuid}/originals/",
             $photo->original_path

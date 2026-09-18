@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePhotosRequest;
+use App\Jobs\ProcessPhoto;
 use App\Models\Event;
 use App\Models\Photo;
-use App\Services\PhotoProcessor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,9 +17,11 @@ class PublicPhotoUploadController extends Controller
      *
      * All trust-sensitive values (event association, storage path/filename,
      * mime type, status) are server-determined. Client-supplied event id,
-     * path, filename, mime, and status are ignored.
+     * path, filename, mime, and status are ignored. The original is stored
+     * synchronously; optimization and thumbnailing are dispatched to a
+     * background job (one per photo) via the queue.
      */
-    public function store(StorePhotosRequest $request, string $slug, PhotoProcessor $processor): RedirectResponse
+    public function store(StorePhotosRequest $request, string $slug): RedirectResponse
     {
         $event = Event::query()
             ->where('slug', $slug)
@@ -28,15 +30,14 @@ class PublicPhotoUploadController extends Controller
 
         abort_if(! $event->upload_enabled, 403, 'Photo uploads are currently closed.');
 
-        $disk     = Storage::disk('public');
-        $failures = 0;
+        $disk = Storage::disk('public');
 
         foreach ($request->file('photos') as $file) {
             $uuid = (string) Str::uuid();
             $ext  = strtolower($file->getClientOriginalExtension() ?: $file->extension());
             $path = "events/{$event->uuid}/originals/{$uuid}.{$ext}";
 
-            // 1. Store the original (unchanged from Phase 5).
+            // Store the original before dispatching any job.
             $disk->putFileAs("events/{$event->uuid}/originals", $file, "{$uuid}.{$ext}");
 
             $absolute = $disk->path($path);
@@ -45,7 +46,6 @@ class PublicPhotoUploadController extends Controller
             $height   = $size[1] ?? null;
             $mime     = $size['mime'] ?? $file->getMimeType();
 
-            // 2. Create the row in processing state.
             $photo = Photo::create([
                 'event_id'          => $event->id,
                 'uuid'              => $uuid,
@@ -55,36 +55,16 @@ class PublicPhotoUploadController extends Controller
                 'file_size'         => $file->getSize(),
                 'width'             => $width,
                 'height'            => $height,
-                'status'            => Photo::STATUS_PROCESSING,
+                'status'            => Photo::STATUS_PENDING,
             ]);
 
-            // 3. Process, then mark ready — or clean up and mark failed.
-            try {
-                $paths = $processor->process($path, $event->uuid, $uuid);
-
-                $photo->update([
-                    'optimized_path' => $paths['optimized_path'],
-                    'thumbnail_path' => $paths['thumbnail_path'],
-                    'status'         => Photo::STATUS_READY,
-                ]);
-            } catch (\Throwable $e) {
-                $disk->delete([
-                    "events/{$event->uuid}/optimized/{$uuid}.webp",
-                    "events/{$event->uuid}/thumbnails/{$uuid}.webp",
-                ]);
-
-                $photo->update(['status' => Photo::STATUS_FAILED]);
-                $failures++;
-            }
+            // One background job per photo; processing happens on the queue.
+            ProcessPhoto::dispatch($photo->id);
         }
 
-        if ($failures > 0) {
-            return back()->with(
-                'success',
-                'Your photos were uploaded. Some could not be processed and were skipped.'
-            );
-        }
-
-        return back()->with('success', 'Your photos have been added to the event!');
+        return back()->with(
+            'success',
+            'Your photos have been uploaded and are being processed.'
+        );
     }
 }

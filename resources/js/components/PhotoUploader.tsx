@@ -125,7 +125,7 @@ export default function PhotoUploader({ slug }: Props) {
 
             {succeeded && (
                 <p className="text-center text-sm text-foreground">
-                    Your photos have been added to the event!
+                    Your photos have been uploaded and are being processed. They may take a moment to appear.
                 </p>
             )}
         </div>
