@@ -137,7 +137,7 @@ class PhotoGalleryTest extends TestCase
         $event = $this->activeEvent(['slug' => 'payload-check']);
         $photo = $this->readyPhoto($event);
 
-        // Put a real file so the Display URL resolves to a /storage path.
+        // Put a real file so the URLs resolve to /storage paths.
         Storage::disk('public')->put($photo->original_path, 'x');
 
         $this->get("/e/{$event->slug}/gallery")
@@ -147,19 +147,23 @@ class PhotoGalleryTest extends TestCase
                     ->has('photos', 1)
                     ->has('photos.0', fn (AssertableInertia $item) => $item
                         ->has('uuid')
-                        ->has('url')
+                        ->has('thumbnailUrl')
+                        ->has('optimizedUrl')
                         ->has('filename')
                         ->has('width')
                         ->has('height')
-                        ->has('mime_type')
+                        ->missing('url')
+                        ->missing('mime_type')
                         ->missing('id')
                         ->missing('event_id')
                         ->missing('original_path')
                     );
 
-                $url = $page->toArray()['props']['photos'][0]['url'];
-                $this->assertIsString($url);
-                $this->assertStringContainsString('/storage', $url);
+                $item = $page->toArray()['props']['photos'][0];
+                $this->assertIsString($item['thumbnailUrl']);
+                $this->assertStringContainsString('/storage', $item['thumbnailUrl']);
+                $this->assertIsString($item['optimizedUrl']);
+                $this->assertStringContainsString('/storage', $item['optimizedUrl']);
             });
     }
 

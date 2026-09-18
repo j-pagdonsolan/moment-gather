@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Photo;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,15 +24,19 @@ class PublicGalleryController extends Controller
         $photos = $event->photos()
             ->where('status', Photo::STATUS_READY)
             ->orderByDesc('id')
-            ->paginate(24, ['id', 'event_id', 'uuid', 'original_path', 'original_filename', 'width', 'height', 'mime_type']);
+            ->paginate(24, [
+                'id', 'event_id', 'uuid',
+                'original_path', 'optimized_path', 'thumbnail_path',
+                'original_filename', 'width', 'height',
+            ]);
 
         $photos->through(fn (Photo $photo) => [
-            'uuid'      => $photo->uuid,
-            'url'       => Storage::disk('public')->url($photo->original_path),
-            'filename'  => $photo->original_filename,
-            'width'     => $photo->width,
-            'height'    => $photo->height,
-            'mime_type' => $photo->mime_type,
+            'uuid'         => $photo->uuid,
+            'thumbnailUrl' => $photo->thumbnailUrl(),
+            'optimizedUrl' => $photo->optimizedUrl(),
+            'filename'     => $photo->original_filename,
+            'width'        => $photo->width,
+            'height'       => $photo->height,
         ]);
 
         return Inertia::render('Public/Gallery', [

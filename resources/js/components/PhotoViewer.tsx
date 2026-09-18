@@ -41,7 +41,7 @@ export default function PhotoViewer({
                 <ChevronLeft className="h-10 w-10" />
             </button>
 
-            <img src={photo.url} alt={photo.filename} className="max-h-[85vh] max-w-[90vw] object-contain" />
+            <img src={photo.optimizedUrl} alt={photo.filename} className="max-h-[85vh] max-w-[90vw] object-contain" />
 
             <button type="button" onClick={goNext} aria-label="Next" className="absolute right-2 text-white sm:right-6">
                 <ChevronRight className="h-10 w-10" />

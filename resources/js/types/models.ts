@@ -34,11 +34,11 @@ export interface PublicEvent {
 
 export interface GalleryPhoto {
     uuid: string;
-    url: string;
+    thumbnailUrl: string;
+    optimizedUrl: string;
     filename: string;
     width: number | null;
     height: number | null;
-    mime_type: string;
 }
 
 export interface GalleryPagination {

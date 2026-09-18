@@ -24,7 +24,7 @@ export default function PhotoCard({
                 </span>
             ) : (
                 <img
-                    src={photo.url}
+                    src={photo.thumbnailUrl}
                     alt={photo.filename}
                     width={photo.width ?? undefined}
                     height={photo.height ?? undefined}

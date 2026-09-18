@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
  * @property string $uuid
  * @property string $original_filename
  * @property string $original_path
+ * @property string|null $optimized_path
+ * @property string|null $thumbnail_path
  * @property string $mime_type
  * @property int $file_size
  * @property int|null $width
@@ -25,7 +28,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
-#[Fillable(['event_id', 'uuid', 'original_filename', 'original_path', 'mime_type', 'file_size', 'width', 'height', 'status'])]
+#[Fillable(['event_id', 'uuid', 'original_filename', 'original_path', 'optimized_path', 'thumbnail_path', 'mime_type', 'file_size', 'width', 'height', 'status'])]
 class Photo extends Model
 {
     /** @use HasFactory<PhotoFactory> */
@@ -68,5 +71,20 @@ class Photo extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function originalUrl(): string
+    {
+        return Storage::disk('public')->url($this->original_path);
+    }
+
+    public function optimizedUrl(): string
+    {
+        return Storage::disk('public')->url($this->optimized_path ?? $this->original_path);
+    }
+
+    public function thumbnailUrl(): string
+    {
+        return Storage::disk('public')->url($this->thumbnail_path ?? $this->original_path);
     }
 }
