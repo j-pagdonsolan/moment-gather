@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "92dfa0b3e9b94e5af0a549c204813f17",
+    "content-hash": "56432dc0035722056f7d8c52167fdd03",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7963,6 +7963,64 @@
                 "source": "https://github.com/iamcal/SQLParser/tree/v0.7"
             },
             "time": "2026-01-28T22:20:33+00:00"
+        },
+        {
+            "name": "innmind/black-box",
+            "version": "6.12.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Innmind/BlackBox.git",
+                "reference": "ca35ee761f043edeced48b87cdec41feb1edd418"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Innmind/BlackBox/zipball/ca35ee761f043edeced48b87cdec41feb1edd418",
+                "reference": "ca35ee761f043edeced48b87cdec41feb1edd418",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2",
+                "phpunit/php-code-coverage": "~10.1|~11.0|~12.0|~13.0|~14.0",
+                "phpunit/php-timer": "~6.0|~7.0|~8.0|~9.0",
+                "phpunit/phpunit": "~10.0|~11.0|~12.0|~13.0",
+                "symfony/var-dumper": "~6.0|~7.0|~8.0"
+            },
+            "require-dev": {
+                "innmind/coding-standard": "~2.0",
+                "innmind/static-analysis": "^1.2.1",
+                "ramsey/uuid": "^4.1"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Runner/functions.php"
+                ],
+                "psr-4": {
+                    "Innmind\\BlackBox\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Baptiste Langlade",
+                    "email": "baptiste.langlade@hey.com"
+                }
+            ],
+            "description": "Test library",
+            "homepage": "http://github.com/Innmind/BlackBox",
+            "keywords": [
+                "fixtures",
+                "property based testing",
+                "test"
+            ],
+            "support": {
+                "issues": "http://github.com/Innmind/BlackBox/issues",
+                "source": "https://github.com/Innmind/BlackBox/tree/6.12.0"
+            },
+            "time": "2026-04-11T15:16:36+00:00"
         },
         {
             "name": "larastan/larastan",

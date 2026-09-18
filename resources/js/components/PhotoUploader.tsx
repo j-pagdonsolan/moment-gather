@@ -16,6 +16,7 @@ interface Preview {
 export default function PhotoUploader({ slug }: Props) {
     const [previews, setPreviews] = useState<Preview[]>([]);
     const [succeeded, setSucceeded] = useState(false);
+    const [rateLimited, setRateLimited] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { setData, post, processing, progress, errors, reset } = useForm<{ photos: File[] }>({
@@ -50,6 +51,7 @@ export default function PhotoUploader({ slug }: Props) {
     }
 
     function submit() {
+        setRateLimited(false);
         post(`/e/${slug}/photos`, {
             forceFormData: true,
             preserveScroll: true,
@@ -58,6 +60,15 @@ export default function PhotoUploader({ slug }: Props) {
                 setPreviews([]);
                 reset('photos');
                 setSucceeded(true);
+            },
+            // A 429 (rate limit) is a non-Inertia response and surfaces via the
+            // httpException event. Show friendly copy and return false to
+            // suppress Inertia's default error modal.
+            onHttpException: (response) => {
+                if (response.status === 429) {
+                    setRateLimited(true);
+                    return false;
+                }
             },
         });
     }
@@ -112,6 +123,13 @@ export default function PhotoUploader({ slug }: Props) {
                     {errorMessages.map((message, i) => (
                         <p key={i}>{message}</p>
                     ))}
+                </div>
+            )}
+
+            {/* Friendly rate-limit (HTTP 429) message. */}
+            {rateLimited && (
+                <div className="text-center text-sm text-destructive">
+                    <p>You've uploaded too many photos in a short period. Please wait a moment and try again.</p>
                 </div>
             )}
 

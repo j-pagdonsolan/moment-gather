@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class StorePhotosRequest extends FormRequest
 {
@@ -44,5 +46,16 @@ class StorePhotosRequest extends FormRequest
             'photos.*.max'      => 'Each photo must be 20 MB or smaller.',
             'photos.*.required' => 'One of the selected files could not be read.',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        Log::warning('Upload validation failed', [
+            'event_slug'  => $this->route('slug'),
+            'file_count'  => is_array($this->file('photos')) ? count($this->file('photos')) : 0,
+            'first_error' => array_key_first($validator->errors()->toArray()),
+        ]);
+
+        parent::failedValidation($validator);
     }
 }

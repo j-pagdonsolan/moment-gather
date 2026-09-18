@@ -1,0 +1,9 @@
+# Disable server-side script execution for user-uploaded content.
+php_flag engine off
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar|pl|py|cgi|asp|aspx|sh|shtml)$">
+    Require all denied
+</FilesMatch>
+
+RemoveHandler .php .phtml .phar
+RemoveType .php .phtml .phar

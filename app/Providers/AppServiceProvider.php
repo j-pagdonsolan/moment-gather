@@ -31,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(
             (int) config('uploads.rate_limit', 10)
         )->by($request->ip()));
+
+        RateLimiter::for('browse', fn (Request $request) => Limit::perMinute(
+            (int) config('uploads.browse_rate_limit', 60)
+        )->by($request->ip()));
     }
 
     /**

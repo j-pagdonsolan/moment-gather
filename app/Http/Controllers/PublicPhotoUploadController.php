@@ -7,6 +7,7 @@ use App\Jobs\ProcessPhoto;
 use App\Models\Event;
 use App\Models\Photo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,23 @@ class PublicPhotoUploadController extends Controller
             ->firstOrFail();
 
         abort_if(! $event->upload_enabled, 403, 'Photo uploads are currently closed.');
+
+        // Event-level photo cap (abuse safeguard, not billing). Counts non-deleted
+        // photos (SoftDeletes global scope excludes soft-deleted rows).
+        $incoming = count($request->file('photos'));
+        $currentCount = $event->photos()->count();
+        $maxPerEvent = (int) config('uploads.max_per_event', 500);
+
+        if ($currentCount + $incoming > $maxPerEvent) {
+            Log::warning('Upload rejected: event photo cap exceeded', [
+                'event_slug'    => $event->slug,
+                'current_count' => $currentCount,
+                'incoming'      => $incoming,
+                'max_per_event' => $maxPerEvent,
+            ]);
+
+            abort(403, 'This event has reached its photo limit. Please contact the organizer.');
+        }
 
         $disk = Storage::disk('public');
 

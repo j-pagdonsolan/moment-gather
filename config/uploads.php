@@ -9,4 +9,10 @@ return [
 
     // Maximum size per file in kilobytes (20 MB).
     'max_file_kb' => (int) env('UPLOAD_MAX_FILE_KB', 20480),
+
+    // Browse requests (event page, gallery, download) allowed per minute per client IP.
+    'browse_rate_limit' => (int) env('BROWSE_RATE_LIMIT', 60),
+
+    // Maximum number of photos that may exist per event (non-deleted).
+    'max_per_event'     => (int) env('UPLOAD_MAX_PER_EVENT', 500),
 ];

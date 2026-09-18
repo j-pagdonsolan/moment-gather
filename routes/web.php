@@ -12,6 +12,7 @@ Route::inertia('/', 'welcome')->name('home');
 
 // Public attendee-facing event page. No authentication.
 Route::get('/e/{slug}', [PublicEventController::class, 'show'])
+    ->middleware('throttle:browse')
     ->name('public.events.show');
 
 // Public guest photo upload. No authentication. Rate-limited by IP.
@@ -21,10 +22,12 @@ Route::post('/e/{slug}/photos', [PublicPhotoUploadController::class, 'store'])
 
 // Public photo gallery. No authentication.
 Route::get('/e/{slug}/gallery', [PublicGalleryController::class, 'show'])
+    ->middleware('throttle:browse')
     ->name('public.events.gallery');
 
 // Public single-photo download. No authentication. Photo resolved by uuid in the controller.
 Route::get('/e/{slug}/photos/{photo}/download', [PublicPhotoDownloadController::class, 'show'])
+    ->middleware('throttle:browse')
     ->name('public.events.photos.download');
 
 Route::middleware(['auth', 'verified'])->group(function () {
