@@ -28,7 +28,7 @@ final class FakePaymentProvider implements PaymentProviderInterface
      * Default HMAC key used when no webhook secret is configured. Keeps the fake
      * deterministic in local/test environments that do not set PAYMENT_WEBHOOK_SECRET.
      */
-    private const DEFAULT_SECRET = 'fake-secret';
+    private const DEFAULT_SECRET = 'local-fake-webhook-secret';
 
     /**
      * Build a signed hosted-checkout session pointing at the local fake checkout
@@ -168,7 +168,9 @@ final class FakePaymentProvider implements PaymentProviderInterface
      */
     private function secret(): string
     {
-        return config('billing.webhook_secret') ?? self::DEFAULT_SECRET;
+        $secret = config('billing.webhook_secret');
+
+        return is_string($secret) && $secret !== '' ? $secret : self::DEFAULT_SECRET;
     }
 
     private function base64UrlEncode(string $value): string

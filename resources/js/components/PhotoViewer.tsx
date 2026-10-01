@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
+
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+
+import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import type { GalleryPhoto } from '@/types';
-import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 const SWIPE_THRESHOLD = 50;
 
@@ -19,6 +22,7 @@ export default function PhotoViewer({
     onClose: () => void;
 }) {
     const photo = photos[index];
+    const hasMultiple = photos.length > 1;
     const goPrev = () => onIndexChange((index - 1 + photos.length) % photos.length);
     const goNext = () => onIndexChange((index + 1) % photos.length);
     const touchStartX = useRef<number | null>(null);
@@ -33,7 +37,7 @@ export default function PhotoViewer({
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [index]);
+    }, [index, photos.length]);
 
     if (!photo) return null;
 
@@ -48,61 +52,81 @@ export default function PhotoViewer({
         touchStartX.current = null;
         if (Math.abs(delta) <= SWIPE_THRESHOLD) return;
         if (delta < 0) {
-            goNext(); // swipe left → next
+            goNext(); // swipe left -> next
         } else {
-            goPrev(); // swipe right → prev
+            goPrev(); // swipe right -> prev
         }
     };
 
+    // Persistent dark, blurred background keeps the controls visible over any image.
+    const controlBase =
+        'z-[60] flex items-center justify-center rounded-full bg-black/50 text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white';
+
     return (
         <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
-            <DialogContent
-                aria-describedby={undefined}
-                className="flex h-screen w-screen max-w-none items-center justify-center border-0 bg-black/95 p-0 [&>button:last-child]:hidden"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-            >
-                <DialogTitle className="sr-only">{photo.filename ?? 'Photo'}</DialogTitle>
+            <DialogPortal>
+                <DialogOverlay className="bg-black/95" />
 
-                <DialogClose
-                    aria-label="Close"
-                    className="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                {/*
+                  A full-screen, unstyled Radix content (no default centered "card"
+                  box). We position the image and controls against the viewport so
+                  the backdrop truly fills the screen and the arrows never get
+                  clipped by a smaller dialog box.
+                */}
+                <DialogPrimitive.Content
+                    aria-describedby={undefined}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 outline-none"
                 >
-                    <X className="h-6 w-6" />
-                </DialogClose>
+                    <DialogTitle className="sr-only">{photo.filename ?? 'Photo'}</DialogTitle>
 
-                <button
-                    type="button"
-                    onClick={goPrev}
-                    aria-label="Previous"
-                    className="absolute left-2 z-10 flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-6"
-                >
-                    <ChevronLeft className="h-8 w-8" />
-                </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close"
+                        className={`absolute top-4 right-4 h-11 w-11 ${controlBase}`}
+                    >
+                        <X className="h-6 w-6" />
+                    </button>
 
-                <img
-                    src={photo.optimizedUrl}
-                    alt={photo.filename}
-                    className="max-h-[85vh] max-w-[90vw] object-contain"
-                />
+                    {hasMultiple && (
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            aria-label="Previous"
+                            className={`absolute top-1/2 left-3 h-12 w-12 -translate-y-1/2 sm:left-6 ${controlBase}`}
+                        >
+                            <ChevronLeft className="h-7 w-7" />
+                        </button>
+                    )}
 
-                <button
-                    type="button"
-                    onClick={goNext}
-                    aria-label="Next"
-                    className="absolute right-2 z-10 flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6"
-                >
-                    <ChevronRight className="h-8 w-8" />
-                </button>
+                    <img
+                        src={photo.optimizedUrl}
+                        alt={photo.filename}
+                        className="max-h-[85vh] max-w-[90vw] object-contain select-none"
+                    />
 
-                <a
-                    href={`/e/${slug}/photos/${photo.uuid}/download`}
-                    className="absolute bottom-6 flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                    <Download className="h-5 w-5" />
-                    Download
-                </a>
-            </DialogContent>
+                    {hasMultiple && (
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            aria-label="Next"
+                            className={`absolute top-1/2 right-3 h-12 w-12 -translate-y-1/2 sm:right-6 ${controlBase}`}
+                        >
+                            <ChevronRight className="h-7 w-7" />
+                        </button>
+                    )}
+
+                    <a
+                        href={`/e/${slug}/photos/${photo.uuid}/download`}
+                        className={`absolute bottom-6 min-h-11 gap-2 px-4 py-2 ${controlBase}`}
+                    >
+                        <Download className="h-5 w-5" />
+                        Download
+                    </a>
+                </DialogPrimitive.Content>
+            </DialogPortal>
         </Dialog>
     );
 }
