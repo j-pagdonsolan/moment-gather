@@ -28,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             SecurityHeaders::class,
         ]);
+
+        $middleware->alias([
+            'admin'  => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'active' => \App\Http\Middleware\EnsureActiveUser::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -68,6 +68,11 @@ class Photo extends Model
         });
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
