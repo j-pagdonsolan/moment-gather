@@ -13,7 +13,7 @@ use App\Http\Controllers\PublicPhotoDownloadController;
 use App\Http\Controllers\PublicPhotoUploadController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
 // Public attendee-facing event page. No authentication.
 Route::get('/e/{slug}', [PublicEventController::class, 'show'])
@@ -39,7 +39,7 @@ Route::get('/e/{slug}/photos/{photo}/download', [PublicPhotoDownloadController::
 // Authenticity is enforced by verifying the provider signature inside the controller.
 Route::post('billing/webhook', [WebhookController::class, 'handle'])->name('billing.webhook');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('events', EventController::class)
@@ -67,3 +67,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+require __DIR__.'/admin.php';

@@ -40,7 +40,7 @@ class WebhookController extends Controller
     {
         $raw    = $request->getContent();
         $sig    = $request->header('X-Signature');
-        $secret = (string) config('billing.webhook_secret');
+        $secret = (string) (config('billing.webhook_secret') ?: 'local-fake-webhook-secret');
 
         // Property 6: invalid signature → 4xx, no state change whatsoever.
         if (! $provider->verifyWebhookSignature($raw, $sig, $secret)) {

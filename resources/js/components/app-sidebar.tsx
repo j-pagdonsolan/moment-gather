@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { CalendarDays, LayoutGrid } from 'lucide-react';
+import { CalendarDays, CreditCard, LayoutGrid } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -32,10 +32,15 @@ export function AppSidebar() {
             icon: CalendarDays,
             isActive: isCurrentOrParentUrl(eventsIndex()),
         },
+        {
+            title: 'Billing',
+            href: '/billing',
+            icon: CreditCard,
+        },
     ];
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>

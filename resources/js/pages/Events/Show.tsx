@@ -45,15 +45,34 @@ export default function EventsShow({ event, publicUrl }: Props) {
         <>
             <Head title={event.name} />
             <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">{event.name}</h1>
-                    <div className="flex items-center gap-2">
-                        <Button asChild variant="outline">
-                            <Link href={eventsEdit({ event: event.uuid })}>Edit</Link>
-                        </Button>
-                        <Button variant="destructive" onClick={() => setConfirmingDelete(true)}>
-                            Delete
-                        </Button>
+                {/* Page hero header */}
+                <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-brand-muted via-card to-card p-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex flex-col gap-2">
+                            <Badge
+                                variant={event.status === 'active' ? 'default' : 'secondary'}
+                                className={event.status === 'active' ? 'w-fit bg-brand text-brand-foreground' : 'w-fit'}
+                            >
+                                {event.status}
+                            </Badge>
+                            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{event.name}</h1>
+                            {event.event_date && (
+                                <p className="text-sm text-muted-foreground">
+                                    📅 {new Date(event.event_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                            )}
+                            {event.location && (
+                                <p className="text-sm text-muted-foreground">📍 {event.location}</p>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={eventsEdit({ event: event.uuid })}>Edit</Link>
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={() => setConfirmingDelete(true)}>
+                                Delete
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -91,17 +110,20 @@ export default function EventsShow({ event, publicUrl }: Props) {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Event QR Code &mdash; {event.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-4">
-                        <p className="text-muted-foreground text-sm">
-                            Guests scan this to open {event.name}.
+                <Card className="overflow-hidden">
+                    <div className="bg-gradient-to-br from-brand-muted to-muted p-6">
+                        <CardTitle className="mb-1 text-base font-semibold">Event QR Code</CardTitle>
+                        <p className="mb-4 text-sm text-muted-foreground">
+                            Guests scan this to open <strong>{event.name}</strong> and upload their photos.
                         </p>
-                        <QrCode url={publicUrl} fileName={`momentgather-${event.slug}-qr.png`} />
-                        <p className="text-muted-foreground break-all text-xs">{publicUrl}</p>
-                    </CardContent>
+                        <div className="flex justify-center">
+                            <QrCode url={publicUrl} fileName={`momentgather-${event.slug}-qr.png`} />
+                        </div>
+                        <p className="mt-3 text-center text-xs text-muted-foreground">
+                            Point your phone camera at this code to open the upload page
+                        </p>
+                        <p className="mt-1 break-all text-center text-xs text-muted-foreground/70">{publicUrl}</p>
+                    </div>
                 </Card>
 
                 <Card>
@@ -126,10 +148,10 @@ export default function EventsShow({ event, publicUrl }: Props) {
             </div>
 
             <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
-                <DialogContent>
+                <DialogContent aria-describedby="delete-event-description">
                     <DialogHeader>
                         <DialogTitle>Delete event</DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription id="delete-event-description">
                             Are you sure you want to delete "{event.name}"? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>

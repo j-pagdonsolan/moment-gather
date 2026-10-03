@@ -26,11 +26,29 @@ class EventController extends Controller
      */
     public function index(Request $request): Response
     {
-        $events = Event::where('user_id', $request->user()->id)
-            ->orderByDesc('created_at')
-            ->get();
+        $query = Event::where('user_id', $request->user()->id)
+            ->orderByDesc('created_at');
 
-        return Inertia::render('Events/Index', ['events' => $events]);
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $events = $query->paginate(12)->withQueryString();
+
+        return Inertia::render('Events/Index', [
+            'events'  => $events,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'status' => $request->input('status', ''),
+            ],
+        ]);
     }
 
     /**

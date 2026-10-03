@@ -26,8 +26,8 @@ class BillingService
     public function currentPlan(User $user): Plan
     {
         return $this->isPro($user)
-            ? Plan::fromConfig('pro')
-            : Plan::fromConfig('free');
+            ? Plan::fromEffectiveConfig('pro')
+            : Plan::fromEffectiveConfig('free');
     }
 
     /**

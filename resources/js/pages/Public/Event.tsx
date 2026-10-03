@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Check, QrCode, Upload } from 'lucide-react';
+import { Camera, Check, QrCode, Upload } from 'lucide-react';
 
 import PhotoUploader from '@/components/PhotoUploader';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,8 @@ export default function PublicEventPage({ event }: Props) {
 
             <div className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-4 py-10 sm:max-w-lg">
                 {/* Hero band — decorative gradient panel carrying the event identity (no image data). */}
-                <header className="flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-b from-primary/10 via-muted to-muted px-6 py-10 text-center">
+                <header className="relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-b from-brand-muted via-muted to-muted px-6 py-10 text-center">
+                    <Camera className="absolute top-4 right-4 size-24 text-brand opacity-10" aria-hidden="true" />
                     <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
                         Share Your Moments
                     </p>

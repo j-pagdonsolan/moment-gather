@@ -10,5 +10,5 @@ return [
     'currency'       => env('BILLING_CURRENCY', 'PHP'),
     'public_key'     => env('PAYMENT_PUBLIC_KEY'),
     'secret_key'     => env('PAYMENT_SECRET_KEY'),      // server-only, never sent to frontend
-    'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET'),  // server-only
+    'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', 'local-fake-webhook-secret'),  // server-only
 ];
