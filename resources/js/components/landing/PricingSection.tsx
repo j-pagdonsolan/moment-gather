@@ -2,7 +2,8 @@ import { Link } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import SectionHeader from '@/components/SectionHeader';
+import { cn } from '@/lib/utils';
+import { useInView } from '@/hooks/use-in-view';
 
 interface PlanData {
     slug: string;
@@ -30,25 +31,27 @@ function formatPrice(cents: number): string {
 }
 
 export default function PricingSection({ plans }: Props) {
+    const { ref, inView } = useInView();
+
     return (
-        <section id="pricing" className="py-20 bg-muted/40">
+        <section ref={ref as React.RefObject<HTMLElement>} id="pricing" className="py-20 bg-muted/40">
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
                 <div className="mb-12 text-center">
-                    <SectionHeader
-                        title="Simple, transparent pricing"
-                        description="Start free. Upgrade when you need more."
-                    />
+                    <h2 className="text-2xl font-semibold text-foreground">Simple, transparent pricing</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">Start free. Upgrade when you need more.</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 max-w-3xl mx-auto">
-                    {plans.map((plan) => {
+                    {plans.map((plan, index) => {
                         const isPro = plan.slug === 'pro';
                         return (
                             <div
                                 key={plan.slug}
-                                className={`relative rounded-2xl border bg-card p-8 flex flex-col ${
-                                    isPro ? 'ring-2 ring-brand border-brand/30' : 'border-border'
-                                }`}
+                                className={cn(
+                                    `relative rounded-2xl border bg-card p-8 flex flex-col transition-all duration-600 ${isPro ? 'ring-2 ring-brand border-brand/30' : 'border-border'}`,
+                                    inView ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+                                )}
+                                style={{ transitionDelay: inView ? `${index * 120}ms` : '0ms' }}
                             >
                                 {isPro && (
                                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">

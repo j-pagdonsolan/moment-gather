@@ -1,5 +1,6 @@
 import { CalendarPlus, QrCode, Upload, Images } from 'lucide-react';
-import SectionHeader from '@/components/SectionHeader';
+import { cn } from '@/lib/utils';
+import { useInView } from '@/hooks/use-in-view';
 
 const steps = [
     {
@@ -29,60 +30,56 @@ const steps = [
 ] as const;
 
 export default function HowItWorksSection() {
+    const { ref, inView } = useInView();
+
     return (
-        <section id="how-it-works" className="py-20 bg-muted/40">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                <div className="mb-12 text-center">
-                    <SectionHeader
-                        title="How It Works"
-                        description="From setup to gallery in four simple steps."
-                    />
+        <section ref={ref as React.RefObject<HTMLElement>} id="how-it-works" className="py-20 bg-muted/40">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6">
+                <div className="mb-16 text-center">
+                    <h2 className="text-2xl font-semibold text-foreground">How It Works</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">From setup to gallery in four simple steps.</p>
                 </div>
 
-                {/* Desktop: horizontal with connectors between circles */}
-                <div className="hidden md:block">
-                    {/* Top row: circles + connectors */}
-                    <div className="flex items-center">
-                        {steps.map((step, index) => (
-                            <div key={step.number} className="flex flex-1 items-center">
-                                {/* Circle */}
-                                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground text-lg font-bold shadow-sm mx-auto">
-                                    {step.number}
-                                </div>
-                                {/* Connector line after each circle except the last */}
-                                {index < steps.length - 1 && (
-                                    <div className="flex-1 h-px bg-border mx-2" aria-hidden="true" />
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Bottom row: icons + titles + descriptions aligned under circles */}
-                    <div className="mt-4 grid grid-cols-4 gap-6">
-                        {steps.map((step) => (
-                            <div key={step.number} className="flex flex-col items-center text-center">
-                                <step.icon className="mb-3 h-7 w-7 text-brand" aria-hidden="true" />
-                                <h3 className="mb-2 font-semibold text-foreground">{step.title}</h3>
-                                <p className="text-sm leading-relaxed text-muted-foreground">
-                                    {step.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Mobile: vertical stacked list */}
-                <ol className="flex flex-col gap-8 md:hidden">
-                    {steps.map((step) => (
-                        <li key={step.number} className="flex items-start gap-4">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground font-bold shadow-sm">
+                {/* Desktop */}
+                <div className={cn('hidden md:grid md:grid-cols-4 gap-8 transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}>
+                    {steps.map((step, index) => (
+                        <div key={step.number} className="relative flex flex-col items-center text-center">
+                            {/* Connector line to the right (not on last item) */}
+                            {index < steps.length - 1 && (
+                                <div
+                                    aria-hidden="true"
+                                    className="absolute top-6 left-1/2 w-full h-px bg-border"
+                                    style={{ left: '50%' }}
+                                />
+                            )}
+                            {/* Circle — sits on top of the line */}
+                            <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-brand text-brand-foreground text-lg font-bold shadow-sm mb-6 ring-4 ring-muted/40">
                                 {step.number}
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-foreground">{step.title}</h3>
-                                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                                    {step.description}
-                                </p>
+                            <step.icon className="mb-3 h-6 w-6 text-brand" aria-hidden="true" />
+                            <h3 className="mb-2 font-semibold text-sm text-foreground">{step.title}</h3>
+                            <p className="text-xs leading-relaxed text-muted-foreground">{step.description}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Mobile */}
+                <ol className={cn('flex flex-col gap-6 md:hidden transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}>
+                    {steps.map((step, index) => (
+                        <li key={step.number} className="relative flex gap-4">
+                            {/* Vertical connector line */}
+                            {index < steps.length - 1 && (
+                                <div aria-hidden="true" className="absolute left-5 top-12 bottom-0 w-px bg-border -mb-6" />
+                            )}
+                            <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground font-bold shadow-sm text-sm ring-4 ring-muted/40">
+                                {step.number}
+                            </div>
+                            <div className="pb-6">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <step.icon className="h-4 w-4 text-brand" aria-hidden="true" />
+                                    <h3 className="font-semibold text-sm text-foreground">{step.title}</h3>
+                                </div>
+                                <p className="text-sm leading-relaxed text-muted-foreground">{step.description}</p>
                             </div>
                         </li>
                     ))}

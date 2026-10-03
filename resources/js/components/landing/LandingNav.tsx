@@ -56,31 +56,49 @@ export default function LandingNav() {
                             <Menu className="h-5 w-5" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-72">
-                        <div className="flex flex-col gap-4 pt-4">
-                            {navLinks.map((link) => (
-                                <a key={link.href} href={link.href}
-                                   className="text-base text-foreground hover:text-brand"
-                                   onClick={() => setOpen(false)}>
-                                    {link.label}
-                                </a>
-                            ))}
-                            <div className="border-t border-border pt-4 flex flex-col gap-2">
-                                {user ? (
-                                    <Button asChild className="bg-brand text-brand-foreground hover:bg-brand/90">
-                                        <Link href="/dashboard">Go to Dashboard</Link>
+                    <SheetContent side="right" className="w-full max-w-xs p-0 flex flex-col">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                            <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+                                <div className="flex size-7 items-center justify-center rounded-lg bg-brand text-brand-foreground">
+                                    <Camera className="h-3.5 w-3.5" aria-hidden="true" />
+                                </div>
+                                <span className="font-semibold text-foreground text-sm">MomentGather</span>
+                            </Link>
+                        </div>
+
+                        {/* Nav links */}
+                        <div className="flex-1 overflow-y-auto px-3 py-4">
+                            <nav className="flex flex-col gap-0.5">
+                                {navLinks.map((link) => (
+                                    <a
+                                        key={link.href}
+                                        href={link.href}
+                                        className="flex items-center rounded-lg px-4 py-3 text-sm font-medium text-foreground hover:bg-muted hover:text-brand transition-colors duration-150"
+                                        onClick={() => setOpen(false)}
+                                    >
+                                        {link.label}
+                                    </a>
+                                ))}
+                            </nav>
+                        </div>
+
+                        {/* Auth buttons pinned to bottom */}
+                        <div className="px-4 py-4 border-t border-border flex flex-col gap-2">
+                            {user ? (
+                                <Button asChild className="w-full bg-brand text-brand-foreground hover:bg-brand/90">
+                                    <Link href="/dashboard" onClick={() => setOpen(false)}>Go to Dashboard</Link>
+                                </Button>
+                            ) : (
+                                <>
+                                    <Button asChild variant="outline" className="w-full">
+                                        <Link href="/login" onClick={() => setOpen(false)}>Log in</Link>
                                     </Button>
-                                ) : (
-                                    <>
-                                        <Button asChild variant="outline">
-                                            <Link href="/login">Log in</Link>
-                                        </Button>
-                                        <Button asChild className="bg-brand text-brand-foreground hover:bg-brand/90">
-                                            <Link href="/register">Get Started Free</Link>
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
+                                    <Button asChild className="w-full bg-brand text-brand-foreground hover:bg-brand/90">
+                                        <Link href="/register" onClick={() => setOpen(false)}>Get Started Free</Link>
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </SheetContent>
                 </Sheet>
