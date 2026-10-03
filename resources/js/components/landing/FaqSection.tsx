@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import SectionHeader from '@/components/SectionHeader';
 import { cn } from '@/lib/utils';
+import { useInView } from '@/hooks/use-in-view';
 
 const faqs = [
     {
@@ -32,18 +32,20 @@ const faqs = [
 
 export default function FaqSection() {
     const [open, setOpen] = useState<number | null>(null);
+    const { ref, inView } = useInView<HTMLDListElement>();
 
     return (
         <section id="faq" className="py-20">
             <div className="mx-auto max-w-3xl px-4 sm:px-6">
                 <div className="mb-12 text-center">
-                    <SectionHeader
-                        title="Frequently asked questions"
-                        description="Everything you need to know about MomentGather."
-                    />
+                    <h2 className="text-2xl font-semibold text-foreground">Frequently asked questions</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">Everything you need to know about MomentGather.</p>
                 </div>
 
-                <dl className="space-y-3">
+                <dl
+                    ref={ref}
+                    className={cn('space-y-3 transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6')}
+                >
                     {faqs.map((faq, i) => (
                         <div key={i} className="rounded-xl border border-border bg-card overflow-hidden">
                             <dt>
