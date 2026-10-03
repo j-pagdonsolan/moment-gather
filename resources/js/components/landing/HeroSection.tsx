@@ -43,14 +43,14 @@ export default function HeroSection() {
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
-                style={{ background: 'radial-gradient(ellipse 60% 70% at 50% 50%, rgba(255,255,255,0.85) 0%, transparent 100%)' }}
+                style={{ background: 'radial-gradient(ellipse 60% 70% at 50% 50%, var(--background) 0%, transparent 100%)' }}
             />
 
             {/* Subtle top gradient */}
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
-                style={{ background: 'radial-gradient(ellipse 80% 40% at 50% -10%, oklch(0.78 0.14 280 / 0.12), transparent)' }}
+                style={{ background: 'radial-gradient(ellipse 80% 40% at 50% -10%, oklch(0.72 0.16 280 / 0.15), transparent)' }}
             />
 
             {/* Orb 1 — large, top-left */}
@@ -61,9 +61,9 @@ export default function HeroSection() {
                     top: '-10%', left: '-5%',
                     width: '500px', height: '500px',
                     borderRadius: '50%',
-                    background: 'oklch(0.78 0.16 280)',
+                    background: 'oklch(0.65 0.14 280)',
                     filter: 'blur(100px)',
-                    opacity: 0.35,
+                    opacity: 0.3,
                 }}
             />
 
@@ -75,9 +75,9 @@ export default function HeroSection() {
                     top: '-15%', right: '-8%',
                     width: '450px', height: '450px',
                     borderRadius: '50%',
-                    background: 'oklch(0.75 0.18 280)',
+                    background: 'oklch(0.62 0.16 280)',
                     filter: 'blur(100px)',
-                    opacity: 0.3,
+                    opacity: 0.25,
                 }}
             />
 
@@ -89,9 +89,9 @@ export default function HeroSection() {
                     bottom: '-10%', left: '5%',
                     width: '300px', height: '300px',
                     borderRadius: '50%',
-                    background: 'oklch(0.80 0.14 280)',
+                    background: 'oklch(0.68 0.12 280)',
                     filter: 'blur(80px)',
-                    opacity: 0.25,
+                    opacity: 0.2,
                 }}
             />
 
@@ -103,9 +103,9 @@ export default function HeroSection() {
                     bottom: '-10%', right: '-5%',
                     width: '420px', height: '420px',
                     borderRadius: '50%',
-                    background: 'oklch(0.76 0.16 280)',
+                    background: 'oklch(0.64 0.14 280)',
                     filter: 'blur(100px)',
-                    opacity: 0.25,
+                    opacity: 0.2,
                 }}
             />
 
