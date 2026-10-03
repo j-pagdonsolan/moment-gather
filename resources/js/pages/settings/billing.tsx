@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import { CreditCard, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
 import CancelSubscriptionDialog from '@/components/billing/CancelSubscriptionDialog';
@@ -88,11 +89,24 @@ export default function Billing({
             <h1 className="sr-only">Billing</h1>
 
             <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Billing"
-                    description="Manage your plan, usage, and payment history"
-                />
+                {/* Branded billing header */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border bg-gradient-to-r from-brand-muted to-transparent p-5">
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-lg bg-brand text-brand-foreground">
+                            <CreditCard className="size-5" aria-hidden="true" />
+                        </div>
+                        <div>
+                            <h1 className="font-semibold text-foreground">Billing & Plan</h1>
+                            <p className="text-xs text-muted-foreground">Manage your subscription and usage</p>
+                        </div>
+                    </div>
+                    <Badge
+                        variant={isPro ? 'default' : 'secondary'}
+                        className={`text-sm px-3 py-1 ${isPro ? 'bg-brand text-brand-foreground' : ''}`}
+                    >
+                        {isPro ? '⭐ Pro Plan' : 'Free Plan'}
+                    </Badge>
+                </div>
 
                 {/* Current plan summary */}
                 <Card>
@@ -131,11 +145,14 @@ export default function Billing({
                     <PlanCard plan={plan} current currency={currency} />
 
                     {!isPro && (
-                        <Card className="flex h-full flex-col justify-between">
+                        <Card className="flex h-full flex-col justify-between ring-2 ring-brand">
                             <CardHeader>
-                                <CardTitle className="text-base">
-                                    Upgrade to Pro
-                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex size-8 items-center justify-center rounded-lg bg-brand text-brand-foreground">
+                                        <TrendingUp className="size-4" aria-hidden="true" />
+                                    </div>
+                                    <CardTitle className="text-base">Upgrade to Pro</CardTitle>
+                                </div>
                                 <CardDescription>
                                     Unlock more active events, higher photo
                                     limits, and more storage.
@@ -143,7 +160,7 @@ export default function Billing({
                             </CardHeader>
                             <CardContent>
                                 <Button
-                                    className="w-full"
+                                    className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
                                     onClick={handleUpgrade}
                                     disabled={upgrading}
                                 >

@@ -1,8 +1,9 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2, UploadCloud, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
     slug: string;
@@ -57,19 +58,6 @@ export default function PhotoUploader({ slug }: Props) {
         e.target.value = ''; // allow re-selecting the same file
     }
 
-    // Progressive enhancement: desktop drag-and-drop. The hidden file input
-    // remains the primary path; dropped files are filtered to accepted image
-    // types and appended via the same syncForm path used by the picker.
-    function handleDragOver(e: React.DragEvent) {
-        e.preventDefault();
-        setDragging(true);
-    }
-
-    function handleDragLeave(e: React.DragEvent) {
-        e.preventDefault();
-        setDragging(false);
-    }
-
     function handleDrop(e: React.DragEvent) {
         e.preventDefault();
         setDragging(false);
@@ -115,15 +103,24 @@ export default function PhotoUploader({ slug }: Props) {
     // intact, so the button acts as a retry affordance.
     const hasError = errorMessages.length > 0 || rateLimited;
 
+    // Success state: full-panel replacement card.
+    if (succeeded) {
+        return (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-8 text-center">
+                <CheckCircle2 className="size-12 text-green-500" aria-hidden="true" />
+                <div>
+                    <p className="font-semibold text-foreground">Photos uploaded!</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Your photos have been added to the gallery.</p>
+                </div>
+                <Button asChild variant="outline">
+                    <a href={`/e/${slug}/gallery`}>View Gallery</a>
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1 text-center">
-                <h2 className="text-lg font-semibold text-foreground">Share Your Moments</h2>
-                <p className="text-sm text-muted-foreground">
-                    Select photos from your device and add them to this event.
-                </p>
-            </div>
-
             <input
                 ref={inputRef}
                 type="file"
@@ -133,49 +130,76 @@ export default function PhotoUploader({ slug }: Props) {
                 onChange={handleSelect}
             />
 
+            {/* Drag-drop upload zone */}
             <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload photos — press Enter or Space to browse files"
+                onClick={() => inputRef.current?.click()}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        inputRef.current?.click();
+                    }
+                }}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
                 onDrop={handleDrop}
-                className={
-                    dragging
-                        ? 'rounded-lg ring-2 ring-ring ring-offset-2'
-                        : undefined
-                }
-            >
-                <Button
-                    size="lg"
-                    variant="outline"
-                    className="min-h-11 w-full"
-                    onClick={() => inputRef.current?.click()}
-                >
-                    Select Photos
-                </Button>
-
-                {previews.length > 0 && (
-                    <ul className="mt-4 grid grid-cols-3 gap-2">
-                        {previews.map((p, i) => (
-                            <li key={p.url} className="relative">
-                                <img
-                                    src={p.url}
-                                    alt=""
-                                    className="aspect-square w-full rounded-md object-cover"
-                                />
-                                <button
-                                    type="button"
-                                    aria-label="Remove photo"
-                                    onClick={() => removeAt(i)}
-                                    className="absolute -top-3 -right-3 flex h-11 w-11 items-center justify-center rounded-full text-foreground"
-                                >
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-background shadow">
-                                        <X className="h-4 w-4" />
-                                    </span>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                className={cn(
+                    'border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer transition-colors duration-200 select-none',
+                    dragging ? 'border-brand bg-brand-muted' : 'border-border hover:border-brand/50 hover:bg-muted/40',
                 )}
+            >
+                <UploadCloud className="size-10 text-muted-foreground" aria-hidden="true" />
+                <div className="text-center">
+                    <p className="font-medium text-foreground">Drag photos here</p>
+                    <p className="text-sm text-muted-foreground">or click to browse</p>
+                </div>
+                <p className="text-xs text-muted-foreground">JPG, PNG, WEBP · Max 10 MB each</p>
             </div>
+
+            {/* Preview grid */}
+            {previews.length > 0 && (
+                <ul className="grid grid-cols-3 gap-2">
+                    {previews.map((p, i) => (
+                        <li key={p.url} className="relative animate-in fade-in zoom-in-95 duration-150">
+                            <img
+                                src={p.url}
+                                alt=""
+                                className="aspect-square w-full rounded-md object-cover"
+                            />
+                            <button
+                                type="button"
+                                aria-label="Remove photo"
+                                onClick={() => removeAt(i)}
+                                className="absolute -top-3 -right-3 flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+                            >
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-background shadow">
+                                    <X className="h-4 w-4" />
+                                </span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {/* Upload progress bar */}
+            {processing && (
+                <div className="space-y-1">
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                            className="h-full bg-brand transition-[width] duration-300 ease-out"
+                            style={{ width: `${progress?.percentage ?? 0}%` }}
+                        />
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">
+                        {progress?.percentage ?? 0}%
+                    </p>
+                </div>
+            )}
 
             {/* Live region so screen readers announce upload state changes. */}
             <div aria-live="polite" className="flex flex-col gap-4">
@@ -194,15 +218,6 @@ export default function PhotoUploader({ slug }: Props) {
                         <p>You've uploaded too many photos in a short period. Please wait a moment and try again.</p>
                     </div>
                 )}
-
-                {succeeded && (
-                    <p className="flex items-center justify-center gap-2 text-center text-sm font-medium text-foreground">
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                        <span>
-                            Your photos have been uploaded and are being processed. They may take a moment to appear.
-                        </span>
-                    </p>
-                )}
             </div>
 
             {previews.length > 0 && (
@@ -214,7 +229,7 @@ export default function PhotoUploader({ slug }: Props) {
                     onClick={submit}
                 >
                     {processing
-                        ? `Uploading${progress ? ` ${progress.percentage}%` : ''}…`
+                        ? 'Uploading…'
                         : hasError
                           ? 'Try Again'
                           : 'Upload Photos'}

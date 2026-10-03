@@ -1,8 +1,8 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
+import { User } from 'lucide-react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,11 +31,15 @@ export default function Profile({
             <h1 className="sr-only">Profile settings</h1>
 
             <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Profile"
-                    description="Update your name and email address"
-                />
+                <div className="flex items-center gap-3 pb-2 border-b border-border">
+                    <div className="flex size-9 items-center justify-center rounded-lg bg-brand-muted text-brand">
+                        <User className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 className="font-semibold text-foreground">Profile</h2>
+                        <p className="text-xs text-muted-foreground">Update your name and email address</p>
+                    </div>
+                </div>
 
                 <Form
                     {...ProfileController.update.form()}

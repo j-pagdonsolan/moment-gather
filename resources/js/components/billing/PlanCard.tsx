@@ -11,6 +11,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { bytes, money } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { BillingPlan } from '@/types/billing';
 
 interface PlanCardProps {
@@ -49,11 +50,11 @@ export default function PlanCard({
     ];
 
     return (
-        <Card className="h-full">
+        <Card className={cn('h-full', current && !isFree && 'ring-2 ring-brand')}>
             <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                     <CardTitle className="text-base">{plan.name}</CardTitle>
-                    {current && <Badge variant="secondary">Current plan</Badge>}
+                    {current && <Badge variant="default">Current plan</Badge>}
                 </div>
                 <CardDescription>
                     <span className="text-2xl font-semibold text-foreground">

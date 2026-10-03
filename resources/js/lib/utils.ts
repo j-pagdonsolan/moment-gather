@@ -10,3 +10,10 @@ export function cn(...inputs: ClassValue[]) {
 export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
+
+export function formatBytes(bytes: number): string {
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}

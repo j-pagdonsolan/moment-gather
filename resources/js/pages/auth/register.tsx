@@ -1,6 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +16,8 @@ type Props = {
 };
 
 export default function Register({ passwordRules }: Props) {
+    const [password, setPassword] = useState('');
+
     return (
         <>
             <Head title="Register" />
@@ -68,7 +72,9 @@ export default function Register({ passwordRules }: Props) {
                                     name="password"
                                     placeholder="Password"
                                     passwordrules={passwordRules}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
+                                <PasswordStrengthIndicator password={password} />
                                 <InputError message={errors.password} />
                             </div>
 
@@ -92,7 +98,7 @@ export default function Register({ passwordRules }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="mt-2 w-full bg-brand text-brand-foreground hover:bg-brand/90"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >

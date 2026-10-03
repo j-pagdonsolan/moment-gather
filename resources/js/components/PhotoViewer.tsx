@@ -27,8 +27,8 @@ export default function PhotoViewer({
     const goNext = () => onIndexChange((index + 1) % photos.length);
     const touchStartX = useRef<number | null>(null);
 
-    // Radix Dialog owns Escape, focus-trap, scroll-lock, focus-restore and aria-modal.
-    // We only handle ArrowLeft/ArrowRight here for prev/next navigation.
+    // Radix Dialog owns focus-trap, scroll-lock, and focus-restore.
+    // Handle ArrowLeft/ArrowRight for prev/next navigation.
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'ArrowLeft') goPrev();
@@ -38,6 +38,13 @@ export default function PhotoViewer({
         return () => window.removeEventListener('keydown', onKey);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [index, photos.length]);
+
+    // Task 28: Escape key closes the viewer
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [onClose]);
 
     if (!photo) return null;
 
@@ -65,15 +72,19 @@ export default function PhotoViewer({
     return (
         <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
             <DialogPortal>
-                <DialogOverlay className="bg-black/95" />
+                {/* Task 28: Add transition-opacity duration-200 to overlay */}
+                <DialogOverlay className="bg-black/95 transition-opacity duration-200" />
 
                 {/*
                   A full-screen, unstyled Radix content (no default centered "card"
                   box). We position the image and controls against the viewport so
                   the backdrop truly fills the screen and the arrows never get
                   clipped by a smaller dialog box.
+                  Task 28: Explicit role="dialog" and aria-modal="true" added.
                 */}
                 <DialogPrimitive.Content
+                    role="dialog"
+                    aria-modal="true"
                     aria-describedby={undefined}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
@@ -94,7 +105,7 @@ export default function PhotoViewer({
                         <button
                             type="button"
                             onClick={goPrev}
-                            aria-label="Previous"
+                            aria-label="Previous photo"
                             className={`absolute top-1/2 left-3 h-12 w-12 -translate-y-1/2 sm:left-6 ${controlBase}`}
                         >
                             <ChevronLeft className="h-7 w-7" />
@@ -111,7 +122,7 @@ export default function PhotoViewer({
                         <button
                             type="button"
                             onClick={goNext}
-                            aria-label="Next"
+                            aria-label="Next photo"
                             className={`absolute top-1/2 right-3 h-12 w-12 -translate-y-1/2 sm:right-6 ${controlBase}`}
                         >
                             <ChevronRight className="h-7 w-7" />

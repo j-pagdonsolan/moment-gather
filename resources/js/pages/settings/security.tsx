@@ -1,7 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
+import { Shield } from 'lucide-react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -29,11 +29,15 @@ export default function Security(props: Props) {
             <h1 className="sr-only">Security settings</h1>
 
             <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
-                />
+                <div className="flex items-center gap-3 pb-2 border-b border-border">
+                    <div className="flex size-9 items-center justify-center rounded-lg bg-brand-muted text-brand">
+                        <Shield className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 className="font-semibold text-foreground">Security</h2>
+                        <p className="text-xs text-muted-foreground">Ensure your account is using a long, random password to stay secure</p>
+                    </div>
+                </div>
 
                 <Form
                     {...SecurityController.update.form()}
